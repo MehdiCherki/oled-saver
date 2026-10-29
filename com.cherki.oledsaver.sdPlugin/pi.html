@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: "Segoe UI", sans-serif; font-size: 12px; color: #ddd; background: #2d2d2d; margin: 0; padding: 10px; }
+  .row { display: flex; align-items: center; justify-content: space-between; margin: 6px 0; gap: 8px; }
+  button, select { background: #3a3f4b; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 4px 10px; cursor: pointer; font: inherit; }
+  .muted { color: #999; }
+  .help { margin-top: 10px; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="row"><span id="lAuto">Auto black-out after</span>
+    <select id="auto">
+      <option value="0"></option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="5">5</option>
+      <option value="10">10</option><option value="15">15</option><option value="30">30</option><option value="60">60</option>
+    </select></div>
+  <div class="row"><span id="lScreens">Screens found</span><b id="screens">…</b></div>
+  <div class="row"><button id="identify">Show screen numbers</button><button id="restore">Bring all screens back</button></div>
+  <div class="help muted" id="help"></div>
+<script>
+// Settings page of OLED Saver. Nothing secret here: only the auto delay and two buttons.
+const L = {
+  en: { lAuto: "Auto black-out after (min)", lScreens: "Screens found", identify: "Show screen numbers", restore: "Bring all screens back", off: "Off",
+    help: "Keys: screens 1-4 (top row), Focus, All, Auto. Knob 1: brightness, press = black. Knob 2: auto delay. Knob 3: pick a screen, press = show numbers. A click on a black screen brings it back." },
+  fr: { lAuto: "Noir automatique après (min)", lScreens: "Écrans trouvés", identify: "Afficher les numéros", restore: "Rallumer tous les écrans", off: "Inactif",
+    help: "Touches : écrans 1-4 (rangée du haut), Focus, Tous, Auto. Molette 1 : luminosité, appui = noir. Molette 2 : délai auto. Molette 3 : choisir un écran, appui = afficher les numéros. Un clic sur un écran noir le rallume." },
+  zh: { lAuto: "自动黑屏延时（分钟）", lScreens: "已找到的屏幕", identify: "显示屏幕编号", restore: "恢复所有屏幕", off: "关",
+    help: "按键：屏幕 1-4（上排）、专注、全部、自动。旋钮 1：亮度，按下 = 黑屏。旋钮 2：自动延时。旋钮 3：选择屏幕，按下 = 显示编号。点击黑屏即可恢复。" },
+};
+const lang = (navigator.language || "en").toLowerCase().startsWith("fr") ? "fr" : (navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en";
+for (const [id, text] of Object.entries(L[lang])) { const el = document.getElementById(id); if (el) el.textContent = text; }
+document.querySelector('#auto option[value="0"]').textContent = L[lang].off;
+
+let ws = null, ctx = "", uuid = "", action = "", n = 0;
+const sid = Math.random().toString(36).slice(2);
+// StreamDock drops some messages sent to the action alone: send to both ids, the plugin keeps one (sid + n)
+function toPlugin(p) {
+  if (!ws || ws.readyState !== 1) return;
+  const payload = { ...p, ctx, sid, n: ++n };
+  for (const to of [ctx, uuid]) ws.send(JSON.stringify({ event: "sendToPlugin", action, context: to, payload }));
+}
+function show(p) {
+  if ("autoMin" in p) document.getElementById("auto").value = String(p.autoMin);
+  if ("screens" in p) document.getElementById("screens").textContent = p.helperUp ? p.screens : "…";
+}
+document.getElementById("auto").onchange = (e) => toPlugin({ cmd: "auto", min: Number(e.target.value) });
+document.getElementById("identify").onclick = () => toPlugin({ cmd: "identify" });
+document.getElementById("restore").onclick = () => toPlugin({ cmd: "restore" });
+
+function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+  const act = JSON.parse(inActionInfo || "{}");
+  ctx = act.context; uuid = inUUID; action = act.action;
+  ws = new WebSocket(`ws://127.0.0.1:${inPort}`);
+  ws.onopen = () => { ws.send(JSON.stringify({ event: inRegisterEvent, uuid: inUUID })); toPlugin({ cmd: "state" }); };
+  ws.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.event === "sendToPropertyInspector") show(m.payload || {}); } catch {} };
+}
+window.connectElgatoStreamDeckSocket = connectElgatoStreamDeckSocket;
+</script>
+</body>
+</html>

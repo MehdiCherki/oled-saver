@@ -1,0 +1,17 @@
+{
+  "name": "oled-saver",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Black out or dim any screen, one key per monitor, to protect OLED panels from burn-in.",
+  "author": "Mehdi Cherki",
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "test": "node scripts/test-e2e.cjs",
+    "install-plugin": "node install.cjs",
+    "create-scene": "node scripts/create-scene.cjs"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2",
+    "ws": "^8.18.0"
+  }
+}

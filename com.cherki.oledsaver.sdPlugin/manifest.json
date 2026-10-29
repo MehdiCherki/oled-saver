@@ -1,0 +1,52 @@
+{
+  "Name": "OLED Saver",
+  "Version": "1.0.0",
+  "Author": "Mehdi Cherki",
+  "Description": "Black out or dim any screen, one key per monitor, to protect OLED panels from burn-in.",
+  "Icon": "images/plugin.png",
+  "CategoryIcon": "images/category.png",
+  "Category": "OLED Saver",
+  "CodePathWin": "plugin/index.js",
+  "Nodejs": { "Version": "20" },
+  "SDKVersion": 1,
+  "Software": { "MinimumVersion": "3.10.188.226" },
+  "OS": [{ "Platform": "windows", "MinimumVersion": "10" }],
+  "Actions": [
+    {
+      "UUID": "com.cherki.oledsaver.key",
+      "Name": "OLED Saver – Key",
+      "Tooltip": "Put it on the 10 keys: screens 1-4, Focus, All and Auto, by place",
+      "Icon": "images/key.png",
+      "PropertyInspectorPath": "pi.html",
+      "States": [{ "Image": "images/key.png" }],
+      "Settings": {},
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": ["Keypad"]
+    },
+    {
+      "UUID": "com.cherki.oledsaver.strip",
+      "Name": "OLED Saver – Touchbar",
+      "Tooltip": "The whole touchbar: brightness, auto delay and a map of your screens. Tap = black out the picked screen",
+      "Icon": "images/strip.png",
+      "PropertyInspectorPath": "pi.html",
+      "States": [{ "Image": "images/strip.png" }],
+      "Settings": { "touchbarWidth": 750 },
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": ["Keypad", "Information"]
+    },
+    {
+      "UUID": "com.cherki.oledsaver.knob",
+      "Name": "OLED Saver – Knob",
+      "Tooltip": "Put it on the 4 knobs: brightness, auto delay, pick a screen (knob 4 = Scene Zapper)",
+      "Icon": "images/knob.png",
+      "PropertyInspectorPath": "pi.html",
+      "States": [{ "Image": "images/knob.png" }],
+      "Settings": {},
+      "UserTitleEnabled": false,
+      "SupportedInMultiActions": false,
+      "Controllers": ["Knob"]
+    }
+  ]
+}
